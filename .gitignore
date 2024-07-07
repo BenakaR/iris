@@ -1,2 +1,6 @@
 /db.sqlite3
 /enc.py
+capture/__pycache__
+capture/migrations/__pycache__
+iris/__pycache__
+/.gitignore
