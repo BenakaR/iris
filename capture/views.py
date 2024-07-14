@@ -5,7 +5,7 @@ from .match import knn_match
 def home(request):
     if request.method == 'POST':
         file = request.FILES['imgfile']
-        fs = FileSystemStorage(location="static/") #defaults to   MEDIA_ROOT  
+        fs = FileSystemStorage(location="static/") # defaults to MEDIA_ROOT  
         fs.delete("output.jpg")
         filename = fs.save("output.jpg", file)
         file_url = fs.url(filename)
@@ -17,7 +17,7 @@ def home(request):
 def match(request):
     if request.method == 'POST':
         file = request.FILES['imgfile']
-        fs = FileSystemStorage(location="static/") #defaults to   MEDIA_ROOT  
+        fs = FileSystemStorage(location="static/") # defaults to MEDIA_ROOT  
         fs.delete("output.jpg")
         fs.save("output.jpg", file)
     result = knn_match("output.jpg")
