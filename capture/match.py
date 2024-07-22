@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import os
+from scipy.spatial.distance import hamming
 
 # def extract_features(image_path: str) -> np.ndarray:
 #     # Read the image
@@ -24,7 +25,7 @@ import os
 
 #     return lbp_features
 
-def knn_match(file_name: str) -> dict:
+def match_iris(file_name: str) -> dict:
     image_files = [f for f in os.listdir(os.getcwd() + '/static/iris_data') ]
     match_data = {}
     print(len(image_files))
@@ -35,6 +36,7 @@ def knn_match(file_name: str) -> dict:
         except:
             similarity = 0
         match_data.update({file1 : similarity})
+        print(i)
     max = 0
     max_file = ''
     for file in match_data:
@@ -116,3 +118,73 @@ def eye_similarity(file1: str, file2: str) -> float:
     similarity_score = corr_coef * 100
 
     return similarity_score
+
+
+def process_iris_image(image_path):
+    # Step 1: Load the image
+    img = cv2.imread(image_path)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Step 2: Detect the iris
+    # Note: This is a simplified approach. For more accurate results,
+    # consider using specialized iris segmentation algorithms.
+    circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, dp=1, minDist=50,
+                               param1=50, param2=30, minRadius=20, maxRadius=100)
+
+    if circles is not None:
+        circles = np.uint16(np.around(circles))
+        iris_circle = circles[0][0]  # Assume the first detected circle is the iris
+        
+        # Step 3: Create a mask for the iris
+        mask = np.zeros(gray.shape, dtype=np.uint8)
+        cv2.circle(mask, (iris_circle[0], iris_circle[1]), iris_circle[2], 255, -1)
+        
+        # Step 4: Apply the mask to isolate the iris
+        iris = cv2.bitwise_and(gray, gray, mask=mask)
+        
+        # Step 5: Initialize SIFT detector
+        sift = cv2.SIFT_create()
+        
+        # Step 6: Detect keypoints and compute descriptors
+        keypoints, descriptors = sift.detectAndCompute(iris, None)
+        
+        # Step 7: Convert descriptors to a binary representation
+        # Note: This step is optional and depends on your specific requirements
+        binary_descriptors = (descriptors > np.mean(descriptors)).astype(int)
+        
+        return binary_descriptors
+    else:
+        print("No iris detected in the image.")
+        return None
+
+
+def compare_iris_features(image_path1, image_path2):
+    """
+    Compare two sets of binary iris features and return a similarity score.
+    
+    Args:
+    features1, features2 (numpy.ndarray): Binary feature arrays to compare
+    
+    Returns:
+    float: Similarity score between 0 and 1, where 1 is a perfect match
+    """
+    path = os.getcwd() + '\static\%s' % (image_path1)
+    features1 = process_iris_image(path)
+
+    path = os.getcwd() + '\static\iris_data\%s' % (image_path2)
+    features2 = process_iris_image(path)
+
+    if features1.shape != features2.shape:
+        raise ValueError("Feature arrays must have the same shape")
+    
+    # Calculate the average Hamming distance across all feature vectors
+    distances = [hamming(f1, f2) for f1, f2 in zip(features1, features2)]
+    avg_distance = np.mean(distances)
+    
+    # Convert distance to similarity score (0 to 1)
+    similarity = 1 - avg_distance
+    
+    return similarity
+
+
+
