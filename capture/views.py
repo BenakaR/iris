@@ -67,7 +67,7 @@ def match(request):
             file.write(Byte_data)
         result = match_iris("output.jpg")
         if result[1] > 40:
-            return HttpResponse("Best Match: " + str(result[0]) +"\n"+ str(result[1]) +"  %")
+            return HttpResponse("Best Match: " + str(result[0]) +"\n"+ str(round(result[1],4)) +"  %")
         else:
             return HttpResponse("Not Matched")
     return render(request,"base.html")

@@ -110,6 +110,8 @@ def req_new():
 				ResLabel.configure(text=data2.text,image=None)
 			if os.path.exists("encoded.jpg"):
 				os.remove("encoded.jpg")
+			if os.path.exists("output.jpg"):
+				os.remove("output.jpg")
 			print("Data sent successfully")
 		except:
 			print("Failed to transfer image")
@@ -153,20 +155,19 @@ def req(event=None):
 def capture(event=None):
 	cam = Picamera2()
 	cam.start_preview(None)
-	capture_config = cam.create_still_configuration()
+	capture_config = cam.create_still_configuration(main={"format": 'RGB888'})
 	#cam.configure(capture_config)
 	cam.controls.ExposureTime=100000
 	cam.controls.Contrast=31.0
 	cam.start_and_capture_file("output.jpg")
 	cam.close()
-	img = Image.open("output.jpg")
-	imgL = ImageTk.PhotoImage(img)
+	img = cv2.imread("output.jpg",cv2.IMREAD_GRAYSCALE)
+	cv2.imwrite("output.jpg",img)
+	img_temp = cv2.resize(img,(800,600))
+	cv2.imshow("Preview Window",img_temp)
 	
 	ResLabel.configure(text="Image Captured")
-	win=tk.Toplevel()
-	win.geometry('800x600+700+300') 
-	l=tk.Label( win, background="white", image=imgL)
-	l.pack()
+	
    
 pane = tk.Frame(window)
 if os.path.exists("encoded.jpg"):
