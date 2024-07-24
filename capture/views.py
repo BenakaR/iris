@@ -5,8 +5,8 @@ import pathlib
 from random import randint
 from cryptography.fernet import Fernet
 
-#key = Fernet.generate_key()
-key = b'bY7JXmRqIyzj4kdkc_YBwJwzTOlc2WEfflGx8RauxaQ='
+#key = Fernet.generate_key()     #--This will generate a unique key for both encryption and decryption. Below is a generated key which will be constant for all transactions.
+key = b'bY7JXmRqIyzj4kdkc_YBwJwzTOlc2WEfflGx8RauxaQ='         # It is NOT AT ALL SAFE to use here. But I have used it directly for the time being.
 
 fnet = Fernet(key)
 
